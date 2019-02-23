@@ -1,68 +1,65 @@
 <template>
-  <div @click="clickHandle">
-
-    <div class="userinfo" @click="bindViewTap">
-      <img class="userinfo-avatar" v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" background-size="cover" />
-      <img class="userinfo-avatar" src="/static/images/user.png" background-size="cover" />
-
-      <div class="userinfo-nickname">
-        <card :text="userInfo.nickName"></card>
-      </div>
-    </div>
-
-    <div class="usermotto">
-      <div class="user-motto">
-        <card :text="motto"></card>
-      </div>
-    </div>
-
-    <form class="form-container">
-      <input type="text" class="form-control" :value="motto" placeholder="v-model" />
-      <input type="text" class="form-control" v-model="motto" placeholder="v-model" />
-      <input type="text" class="form-control" v-model.lazy="motto" placeholder="v-model.lazy" />
-    </form>
-
-    <a href="/pages/counter/main" class="counter">去往Vuex示例页面</a>
-
-    <div class="all">
-        <div class="left">
-        </div>
-        <div class="right">
-        </div>
+  <div class="index">
+    <div class="index-container">
+      <h2>身份验证</h2>
+      <van-cell-group>
+        <van-field
+          :value="name"
+          placeholder="请输入真实姓名"
+        />
+        <van-field
+          :value="idNumber"
+          placeholder="请输入身份证号"
+          :border="false"
+        />
+      </van-cell-group>
+      <van-radio-group :value="from" checked-color="#07c160">
+        <van-radio name="1">本市户籍</van-radio>
+        <van-radio name="2">非本市户籍</van-radio>
+      </van-radio-group>
+      <camera
+        device-position="back"
+        flash="off"
+        @error="error"
+        style="width: 100%; height: 300px;"
+        v-if="!imgSrc"
+      ></camera >
+      <img :src="imgSrc ? imgSrc : null" alt="" v-else>
+      <van-button custom-class="identify-btn" type="default" @click="takePhoto">{{imgSrc ? '重新识别' : '识别'}}</van-button>
+      <!--<van-button custom-class="next-step-btn" type="primary">下一步</van-button>-->
     </div>
   </div>
 </template>
 
 <script>
-import card from '@/components/card'
-
 export default {
   data () {
     return {
-      motto: 'Hello miniprograme',
-      userInfo: {
-        nickName: 'mpvue',
-        avatarUrl: 'http://mpvue.com/assets/logo.png'
-      }
+      imgSrc: null,
+      name: null,
+      idNumber: null,
+      from: 1
     }
   },
-
-  components: {
-    card
-  },
-
   methods: {
-    bindViewTap () {
-      const url = '../logs/main'
-      if (mpvuePlatform === 'wx') {
-        mpvue.switchTab({ url })
-      } else {
-        mpvue.navigateTo({ url })
+    takePhoto() {
+      if(this.imgSrc) {
+        this.imgSrc = null;
+      }else {
+        let _this = this;
+        const ctx = wx.createCameraContext()
+        ctx.takePhoto({
+          quality: 'high',
+          success: (res) => {
+            _this.imgSrc = res.tempImagePath;
+            _this.name = '张三';
+            _this.idNumber = '330483199401186666';
+          }
+        })
       }
     },
-    clickHandle (ev) {
-      console.log('clickHandle:', ev)
-      // throw {message: 'custom test'}
+    error(e) {
+      console.log(e.detail)
     }
   },
 
@@ -72,55 +69,21 @@ export default {
 }
 </script>
 
-<style scoped>
-.userinfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.userinfo-avatar {
-  width: 128rpx;
-  height: 128rpx;
-  margin: 20rpx;
-  border-radius: 50%;
-}
-
-.userinfo-nickname {
-  color: #aaa;
-}
-
-.usermotto {
-  margin-top: 150px;
-}
-
-.form-control {
-  display: block;
-  padding: 0 12px;
-  margin-bottom: 5px;
-  border: 1px solid #ccc;
-}
-.all{
-  width:7.5rem;
-  height:1rem;
-  background-color:blue;
-}
-.all:after{
-  display:block;
-  content:'';
-  clear:both;
-}
-.left{
-  float:left;
-  width:3rem;
-  height:1rem;
-  background-color:red;
-}
-
-.right{
-  float:left;
-  width:4.5rem;
-  height:1rem;
-  background-color:green;
-}
+<style lang="less">
+  .index {
+    background: #f5f5f5;
+    .index-container {
+      padding: 20px;
+      border-radius: 5px;
+      background: #fff;
+    }
+  }
+  .identify-btn {
+    border-color: red !important;
+  }
+  .next-step-btn {
+    width: 80%;
+    border-color: red !important;
+    background: red !important;
+  }
 </style>
